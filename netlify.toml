@@ -1,0 +1,19 @@
+[build]
+  command = "mkdir -p dist && cp -r index.html app.js style.css sw.js manifest.webmanifest favicon.svg icons dist/"
+  publish = "dist"
+  functions = "netlify/functions"
+
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "no-cache"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "no-referrer"
+
+# the "Deploy to Netlify" button asks for these
+[template.environment]
+  WISHLIST_KEY = "Пароль для входа в вишлист (придумай любой длинный)"
