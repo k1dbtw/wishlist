@@ -33,9 +33,9 @@ const ctx = {
     const list = ctx.cats(kind);
     return (list.find((c) => c.id === (kind === "income" ? "c-other-in" : "c-other")) || list[list.length - 1] || {}).id || null;
   },
-  prefs: () => store.get("prefs", "main") || { currency: "RUB", budget: null },
+  prefs: () => store.get("prefs", "main") || { currency: "UZS", budget: null },
   setPrefs: (patch) => store.put("prefs", { ...ctx.prefs(), ...patch, id: "main" }),
-  currency: () => ctx.prefs().currency || "RUB",
+  currency: () => ctx.prefs().currency || "UZS",
   look: () => look,
   setLook(patch) { look = { ...look, ...patch }; save("stash.look", look); applyLook(); },
   logout,
@@ -120,7 +120,7 @@ function showAuth(message) {
     h("h1", { class: "mark" }, "stash"),
     h("p", { class: "pitch" }, "Деньги, дела и желания ", h("b", {}, "в одном тихом месте"), ". Записываешь одной строкой, где бы ни был: телефон и компьютер всегда показывают одно и то же."),
     h("ul", { class: "feats" },
-      h("li", {}, h("b", {}, "деньги"), h("span", {}, "«кофе 250» и готово: категория, дата, графики, бюджет на месяц")),
+      h("li", {}, h("b", {}, "деньги"), h("span", {}, "«кофе 25к» и готово: категория, дата, графики, бюджет на месяц")),
       h("li", {}, h("b", {}, "дела"), h("span", {}, "мысли и задачи со сроками словами: «завтра», «в пятницу», «#работа»")),
       h("li", {}, h("b", {}, "хочу"), h("span", {}, "вишлист со ссылками и ценами, и сколько месяцев копить на всё"))),
     form, switchLine));
@@ -141,9 +141,12 @@ async function startApp() {
 // first sign-in on a fresh account: starter categories and preferences
 function seedIfNeeded() {
   const s = store.getStatus();
+  // accounts created while the default was rubles move to sums once; a later manual choice is kept
+  const p = store.get("prefs", "main");
+  if (me && !s.offline && !s.pulling && p && p.cv !== 2) store.put("prefs", { ...p, currency: p.currency === "RUB" ? "UZS" : p.currency, cv: 2 });
   if (!me || s.offline || s.pulling || store.all("cats").length) return;
   for (const c of DEFAULT_CATS) store.put("cats", c);
-  if (!store.get("prefs", "main")) store.put("prefs", { id: "main", currency: "RUB", budget: null });
+  if (!store.get("prefs", "main")) store.put("prefs", { id: "main", currency: "UZS", budget: null, cv: 2 });
 }
 
 async function logout({ silent } = {}) {

@@ -47,7 +47,8 @@ const shapes = {
     keywords: str(x.keywords, 300),
   }),
   prefs: (x) => ({
-    currency: oneOf(x.currency, ["RUB", "USD", "EUR", "KZT", "UAH", "BYN", "GBP", "TRY", "GEL", "AMD"], "RUB"),
+    currency: oneOf(x.currency, ["UZS", "RUB", "USD", "EUR", "KZT", "UAH", "BYN", "GBP", "TRY", "GEL", "AMD"], "UZS"),
+    cv: oneOf(x.cv, [1, 2], 1),  // 2 = default currency already moved to UZS
     budget: num(x.budget),
     name: str(x.name, 60),
   }),

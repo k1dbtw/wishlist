@@ -34,7 +34,7 @@ export function openSettings(ctx) {
       pwBox);
 
     // ---------- money ----------
-    const currency = h("select", { id: "set-currency", onchange: () => ctx.setPrefs({ currency: currency.value }) },
+    const currency = h("select", { id: "set-currency", onchange: () => ctx.setPrefs({ currency: currency.value, cv: 2 }) },
       CURRENCIES.map(([code, label]) => h("option", { value: code, selected: code === prefs.currency }, label)));
     const budget = h("input", { id: "set-budget", inputMode: "decimal", placeholder: "не задан", value: prefs.budget ? String(prefs.budget) : "",
       onchange: () => ctx.setPrefs({ budget: toNumber(budget.value) }) });

@@ -7,7 +7,7 @@ export function moneyView(ctx) {
   const st = { mode: "month", y: now.getFullYear(), m: now.getMonth(), kind: "expense", filter: null, addKind: null, addCat: null, addDate: null };
 
   // ---------- capture line ----------
-  const input = h("input", { id: "money-q", type: "text", placeholder: "кофе 250 или +80к зарплата", "aria-label": "новая операция", enterkeyhint: "done", autocomplete: "off", inputMode: "text" });
+  const input = h("input", { id: "money-q", type: "text", placeholder: "кофе 25к или +8 млн зарплата", "aria-label": "новая операция", enterkeyhint: "done", autocomplete: "off", inputMode: "text" });
   const sign = h("button", { type: "button", class: "sign", "aria-label": "расход или доход" });
   const go = h("button", { type: "submit", class: "go", "aria-label": "добавить" }, "+");
   const preview = h("p", { class: "preview" });
@@ -30,7 +30,7 @@ export function moneyView(ctx) {
     sign.dataset.kind = e.kind;
     go.classList.toggle("on", !!input.value.trim());
     preview.textContent = "";
-    if (!input.value.trim()) preview.append("сумма, что купил, можно дату: «такси 640 вчера»");
+    if (!input.value.trim()) preview.append("сумма, что купил, можно дату: «такси 18к вчера»");
     else {
       preview.append(h("b", {}, e.amount != null ? money(e.kind === "income" ? e.amount : -e.amount, ctx.currency(), { sign: true }) : "сумма?"));
       preview.append(" · " + (ctx.cat(e.cat)?.name || "без категории"), " · " + dayLabel(e.date, { withWeekday: false }));
@@ -48,7 +48,7 @@ export function moneyView(ctx) {
     ev.preventDefault();
     const e = effective();
     if (!input.value.trim()) return;
-    if (!e.amount) { toast("Добавь сумму, например «кофе 250»"); return; }
+    if (!e.amount) { toast("Добавь сумму, например «кофе 25 000»"); return; }
     store.put("txns", { kind: e.kind, amount: e.amount, cat: e.cat, date: e.date, note: e.note.slice(0, 300) });
     input.value = ""; st.addCat = null; st.addKind = null; st.addDate = null;
     renderCapture();
@@ -109,7 +109,7 @@ export function moneyView(ctx) {
     }
 
     if (!all.length) {
-      body.append(h("p", { class: "empty" }, "Здесь появятся твои траты и доходы. Напиши в строке выше ", h("b", {}, "«продукты 1 840»"), " или ", h("b", {}, "«+120к зарплата»"), ": сумму, категорию и дату приложение поймёт само."));
+      body.append(h("p", { class: "empty" }, "Здесь появятся твои траты и доходы. Напиши в строке выше ", h("b", {}, "«продукты 145 000»"), " или ", h("b", {}, "«+8 млн зарплата»"), ": сумму, категорию и дату приложение поймёт само."));
       return;
     }
 

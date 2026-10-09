@@ -49,19 +49,25 @@ export function dayLabel(s, { withWeekday = true } = {}) {
 
 // ---------- money ----------
 let fmtCache = {};
-export function money(n, cur = "RUB", { sign = false } = {}) {
-  const f = (fmtCache[cur] ||= new Intl.NumberFormat("ru-RU", { style: "currency", currency: cur, maximumFractionDigits: 2, minimumFractionDigits: 0 }));
-  const s = f.format(Math.abs(n));
+export function money(n, cur = "UZS", { sign = false } = {}) {
+  let s;
+  if (cur === "UZS") {
+    s = (fmtCache.UZS ||= new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 0 })).format(Math.abs(n)) + " сум";
+  } else {
+    const f = (fmtCache[cur] ||= new Intl.NumberFormat("ru-RU", { style: "currency", currency: cur, maximumFractionDigits: 2, minimumFractionDigits: 0 }));
+    s = f.format(Math.abs(n));
+  }
   return sign ? (n > 0 ? "+" : n < 0 ? "−" : "") + s : n < 0 ? "−" + s : s;
 }
 export const shortMoney = (n) => (n >= 1e6 ? (n / 1e6).toFixed(n >= 1e7 ? 0 : 1).replace(".", ",") + " млн" : n >= 1e3 ? Math.round(n / 1e3) + " тыс" : String(Math.round(n)));
 
 // ---------- parsing a quick-add line ----------
 const NUM = String.raw`(\d{1,3}(?:[\s ]\d{3})+(?:[.,]\d+)?|\d+(?:[.,]\d+)?)`;
-const SUFFIX = String.raw`(к|k|тыс\.?|т\.р\.?|₽|р\.?|руб\.?|rub|\$|€|usd|eur)?`;
+const SUFFIX = String.raw`(млн|mln|к|k|тыс\.?|т\.р\.?|сум|сўм|so'?m|sum|uzs|₽|р\.?|руб\.?|rub|\$|€|usd|eur)?`;
 function toAmount(raw, suf) {
   let n = parseFloat(raw.replace(/[\s ]/g, "").replace(",", "."));
-  if (/^(к|k|тыс|т\.р)/i.test(suf || "")) n *= 1000;
+  if (/^(млн|mln)/i.test(suf || "")) n *= 1e6;
+  else if (/^(к|k|тыс|т\.р)/i.test(suf || "")) n *= 1000;
   return Number.isFinite(n) ? Math.round(n * 100) / 100 : null;
 }
 const clean = (s) => s.replace(/\s{2,}/g, " ").replace(/^[\s,—–-]+|[\s,—–-]+$/g, "").trim();
@@ -99,7 +105,7 @@ export function takeDate(s, { future = false } = {}) {
   return [null, s];
 }
 
-/** "кофе 250", "+80 000 зарплата", "такси 1,2к вчера" */
+/** "кофе 25 000", "+8 млн зарплата", "такси 18к вчера" */
 export function parseTxn(raw, cats) {
   let s = raw.trim(), kind = null;
   if (/^\+/.test(s)) { kind = "income"; s = s.slice(1); }
@@ -133,7 +139,7 @@ export function parseTask(raw, cats) {
   return { text: clean(s), cat, due };
 }
 
-/** "наушники sony https://… 32к" */
+/** "наушники sony https://… 3,5 млн" */
 export function parseWish(raw) {
   let s = raw.trim(), url = "", price = null;
   const m = s.match(/https?:\/\/\S+/i);

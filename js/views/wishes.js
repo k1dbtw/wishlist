@@ -21,7 +21,7 @@ export function wishesView(ctx) {
     const v = input.value.trim();
     go.classList.toggle("on", !!v);
     preview.textContent = "";
-    if (!v) { preview.append("вставь ссылку и цену: «кеды https://… 7 990»"); return; }
+    if (!v) { preview.append("вставь ссылку и цену: «кеды https://… 890 000»"); return; }
     const p = parseWish(v);
     preview.append(h("b", {}, p.title || "…"));
     if (p.url) preview.append(" · " + host(p.url));
@@ -60,7 +60,7 @@ export function wishesView(ctx) {
       }[ui.sort];
       body.append(h("ul", { class: "list", style: { marginTop: "16px", borderTop: "1px solid var(--line)" } }, want.sort(cmp).map(row)));
     } else {
-      body.append(h("p", { class: "empty" }, all.length ? "Все желания сбылись. Пора придумать новые." : h("span", {}, "Пока пусто. Напиши, например, ", h("b", {}, "«наушники sony 32к»"), ": название и цену приложение разберёт само.")));
+      body.append(h("p", { class: "empty" }, all.length ? "Все желания сбылись. Пора придумать новые." : h("span", {}, "Пока пусто. Напиши, например, ", h("b", {}, "«наушники sony 3,5 млн»"), ": название и цену приложение разберёт само.")));
     }
 
     if (done.length) {
