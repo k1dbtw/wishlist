@@ -140,12 +140,19 @@ async function startApp() {
 
 // one-time changes for accounts created by an older version; each runs once per account,
 // so a later manual choice (another currency, a deleted category) is kept
-const MIGRATION = 3;
+const MIGRATION = 4;
 function migrate(p) {
   const v = p.cv || 1;
   const patch = { cv: MIGRATION };
   if (v < 2 && p.currency === "RUB") patch.currency = "UZS";
-  if (v < 3 && !store.get("cats", "c-energy")) store.put("cats", DEFAULT_CATS.find((c) => c.id === "c-energy"));
+  const def = (id) => DEFAULT_CATS.find((c) => c.id === id);
+  if (v < 3 && !store.get("cats", "c-energy")) store.put("cats", def("c-energy"));
+  if (v < 4) {
+    for (const id of ["c-drinks", "c-gifts"]) if (!store.get("cats", id)) store.put("cats", def(id));
+    // coffee now belongs to "Напитки" and presents to "Подарки"; energy drinks move to the top (an earlier version stored them at 0)
+    for (const id of ["c-cafe", "c-fun"]) { const c = store.get("cats", id); if (c) store.put("cats", { ...c, keywords: def(id).keywords }); }
+    const e = store.get("cats", "c-energy"); if (e && e.order >= 0) store.put("cats", { ...e, order: def("c-energy").order });
+  }
   store.put("prefs", { ...p, ...patch });
 }
 

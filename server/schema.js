@@ -43,12 +43,12 @@ const shapes = {
     scope: oneOf(x.scope, ["expense", "income", "task"], "expense"),
     name: str(x.name, 40) || "категория",
     color: oneOf(x.color, [0, 1, 2, 3, 4, 5, 6, 7, 8], 0),  // 0–7 palette slots, 8 = neutral
-    order: num(x.order, 1e6) ?? 0,
+    order: typeof x.order === "number" && Number.isFinite(x.order) && Math.abs(x.order) <= 1e6 ? x.order : 0,
     keywords: str(x.keywords, 300),
   }),
   prefs: (x) => ({
     currency: oneOf(x.currency, ["UZS", "RUB", "USD", "EUR", "KZT", "UAH", "BYN", "GBP", "TRY", "GEL", "AMD"], "UZS"),
-    cv: oneOf(x.cv, [1, 2, 3], 1),  // one-time client migrations done: 2 = currency → UZS, 3 = "Энергетики" category
+    cv: oneOf(x.cv, [1, 2, 3, 4], 1),  // one-time client migrations done: 2 = currency → UZS, 3 = "Энергетики", 4 = "Напитки" and "Подарки"
     budget: num(x.budget),
     name: str(x.name, 60),
   }),
