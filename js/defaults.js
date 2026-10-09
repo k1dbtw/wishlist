@@ -1,6 +1,7 @@
 // Starter categories. Fixed ids, so two devices seeding at the same moment write the
 // same records instead of duplicates. Colour = palette slot (8 = neutral).
 export const DEFAULT_CATS = [
+  ["c-energy", "expense", "Энергетики", 7, "энергетик, red bull, редбул, ред бул, monster, монстр, burn, берн, adrenaline, адреналин, flash up, флеш, gorilla, горилл, tornado, торнадо, lit energy, драйв"],
   ["c-food", "expense", "Продукты", 0, "продукт, магазин, пятёрочк, пятерочк, перекрёст, перекрест, магнит, вкусвилл, ашан, лента, самокат, еда, овощ, корзинк, макро, havas, хавас, базар, фрукт"],
   ["c-cafe", "expense", "Кафе", 1, "кофе, кафе, ресторан, обед, ужин, завтрак, бар, пицц, суши, ролл, бургер, шаурм, доставк, ланч, плов, самс, лагман, шашлык, чайхан, uzum tezkor"],
   ["c-transport", "expense", "Транспорт", 2, "такси, метро, автобус, бензин, заправк, парковк, каршеринг, электричк, поезд, самолёт, билет, тройк, yandex go, яндекс го, мойк"],
@@ -20,6 +21,6 @@ export const DEFAULT_CATS = [
   ["t-personal", "task", "Личное", 2, ""],
   ["t-ideas", "task", "Идеи", 6, ""],
   ["t-buy", "task", "Купить", 1, ""],
-].map(([id, scope, name, color, keywords], i) => ({ id, scope, name, color, keywords, order: i }));
+].map(([id, scope, name, color, keywords], i) => ({ id, scope, name, color, keywords, order: i - 1 }));
 
 export const CURRENCIES = [["UZS", "сум"], ["RUB", "₽ рубль"], ["USD", "$ доллар"], ["EUR", "€ евро"], ["KZT", "₸ тенге"], ["UAH", "₴ гривна"], ["BYN", "Br белорусский рубль"], ["GBP", "£ фунт"], ["TRY", "₺ лира"], ["GEL", "₾ лари"], ["AMD", "֏ драм"]];

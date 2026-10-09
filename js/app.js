@@ -138,15 +138,26 @@ async function startApp() {
   takeShare();
 }
 
+// one-time changes for accounts created by an older version; each runs once per account,
+// so a later manual choice (another currency, a deleted category) is kept
+const MIGRATION = 3;
+function migrate(p) {
+  const v = p.cv || 1;
+  const patch = { cv: MIGRATION };
+  if (v < 2 && p.currency === "RUB") patch.currency = "UZS";
+  if (v < 3 && !store.get("cats", "c-energy")) store.put("cats", DEFAULT_CATS.find((c) => c.id === "c-energy"));
+  store.put("prefs", { ...p, ...patch });
+}
+
 // first sign-in on a fresh account: starter categories and preferences
 function seedIfNeeded() {
   const s = store.getStatus();
   // accounts created while the default was rubles move to sums once; a later manual choice is kept
   const p = store.get("prefs", "main");
-  if (me && !s.offline && !s.pulling && p && p.cv !== 2) store.put("prefs", { ...p, currency: p.currency === "RUB" ? "UZS" : p.currency, cv: 2 });
+  if (me && !s.offline && !s.pulling && p && (p.cv || 1) < MIGRATION) migrate(p);
   if (!me || s.offline || s.pulling || store.all("cats").length) return;
   for (const c of DEFAULT_CATS) store.put("cats", c);
-  if (!store.get("prefs", "main")) store.put("prefs", { id: "main", currency: "UZS", budget: null, cv: 2 });
+  if (!store.get("prefs", "main")) store.put("prefs", { id: "main", currency: "UZS", budget: null, cv: MIGRATION });
 }
 
 async function logout({ silent } = {}) {
