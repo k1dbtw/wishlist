@@ -3,88 +3,25 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>wishlist</title>
-  <meta name="description" content="мой вишлист">
+  <title>stash</title>
+  <meta name="description" content="Деньги, дела и желания в одном месте. Синхронизация между телефоном и компьютером.">
   <meta name="theme-color" content="#f4f4f6" media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="#0f0f11" media="(prefers-color-scheme: dark)">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="wishlist">
+  <meta name="apple-mobile-web-app-title" content="stash">
   <link rel="manifest" href="/manifest.webmanifest">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@1&family=Onest:wght@400;500;600&display=swap">
-  <link rel="stylesheet" href="/style.css">
-  <script>
-    // apply saved theme + accent before first paint
-    try {
-      var p = JSON.parse(localStorage.getItem("wl.prefs") || "{}");
-      if (p.theme && p.theme !== "auto") document.documentElement.dataset.theme = p.theme;
-      if (p.accent) document.documentElement.style.setProperty("--accent", p.accent);
-    } catch (e) {}
-  </script>
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/js/boot.js"></script>
+  <script type="module" src="/js/app.js"></script>
 </head>
 <body>
-  <!-- вход -->
-  <section class="gate" id="gate" hidden>
-    <h1 class="mark">wishlist</h1>
-    <form id="gateForm" class="gate-form" autocomplete="off">
-      <input id="gateKey" type="password" placeholder="ключ" aria-label="ключ" autocomplete="current-password" enterkeyhint="go">
-      <button type="submit" class="go on" aria-label="войти">→</button>
-    </form>
-    <p class="gate-msg" id="gateMsg">введи ключ из настроек vercel — один раз на каждом устройстве</p>
-  </section>
-
-  <!-- приложение -->
-  <main class="app" id="app" hidden>
-    <header class="head">
-      <h1 class="mark">wishlist<i class="sync" id="sync" title=""></i></h1>
-      <p class="total" id="total"></p>
-    </header>
-
-    <form class="add" id="add" autocomplete="off">
-      <button type="button" class="prio" id="prio" data-p="2" aria-label="насколько хочется"><i></i><i></i><i></i></button>
-      <input id="q" type="text" placeholder="что хочется?" aria-label="новое желание" enterkeyhint="done">
-      <button type="submit" class="go" id="go" aria-label="добавить">+</button>
-    </form>
-    <p class="preview" id="preview">можно сразу со ссылкой и ценой</p>
-
-    <ul class="list" id="list"></ul>
-    <p class="empty" id="empty" hidden>пока пусто. напиши, например,<br><span>наушники sony 32к</span></p>
-
-    <button class="fold" id="fold" type="button" hidden></button>
-    <ul class="list done" id="doneList" hidden></ul>
-
-    <footer class="foot">
-      <button type="button" class="link" id="sortBtn"></button>
-      <button type="button" class="link" id="setBtn" aria-expanded="false">настройки</button>
-    </footer>
-
-    <section class="settings" id="settings" hidden>
-      <div class="set-row">
-        <span>цвет</span>
-        <div class="swatches" id="swatches"></div>
-      </div>
-      <div class="set-row">
-        <span>тема</span>
-        <div class="seg" id="themeSeg">
-          <button type="button" data-v="auto">авто</button>
-          <button type="button" data-v="light">светлая</button>
-          <button type="button" data-v="dark">тёмная</button>
-        </div>
-      </div>
-      <div class="set-row">
-        <span id="syncInfo">синхронизировано</span>
-        <button type="button" class="link" id="logout">выйти</button>
-      </div>
-    </section>
-  </main>
-
-  <div class="toast" id="toast" hidden><span id="toastText"></span><button type="button" id="toastBtn">вернуть</button></div>
-
-  <script src="/app.js"></script>
+  <noscript>Для работы stash нужен JavaScript.</noscript>
 </body>
 </html>

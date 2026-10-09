@@ -1,35 +1,27 @@
-// app shell offline; the API always goes to the network
-const CACHE = "wishlist-v1";
-const SHELL = ["/", "/style.css", "/app.js", "/manifest.webmanifest", "/favicon.svg", "/icons/icon-192.png"];
+// app shell works offline; /api always goes to the network
+const CACHE = "stash-v2";
+const SHELL = ["/", "/styles.css", "/js/boot.js", "/js/app.js", "/js/util.js", "/js/store.js", "/js/charts.js", "/js/defaults.js",
+  "/js/views/money.js", "/js/views/tasks.js", "/js/views/wishes.js", "/js/views/settings.js",
+  "/manifest.webmanifest", "/favicon.svg", "/icons/icon-192.png"];
 
-self.addEventListener("install", (e) => {
-  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)));
-  self.skipWaiting();
-});
-
+self.addEventListener("install", (e) => e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL))));
 self.addEventListener("activate", (e) => {
   e.waitUntil(caches.keys().then((ks) => Promise.all(ks.filter((k) => k !== CACHE).map((k) => caches.delete(k)))));
   self.clients.claim();
 });
+self.addEventListener("message", (e) => { if (e.data === "skip-waiting") self.skipWaiting(); });
 
 self.addEventListener("fetch", (e) => {
-  const req = e.request;
-  const url = new URL(req.url);
+  const req = e.request, url = new URL(req.url);
   if (req.method !== "GET" || url.pathname.startsWith("/api/")) return;
-
-  // fonts: cache first
   if (url.hostname.endsWith("fonts.googleapis.com") || url.hostname.endsWith("fonts.gstatic.com")) {
-    e.respondWith(caches.match(req).then((hit) => hit || fetch(req).then((res) => {
-      const copy = res.clone(); caches.open(CACHE).then((c) => c.put(req, copy)); return res;
-    })));
+    e.respondWith(caches.match(req).then((hit) => hit || fetch(req).then((res) => { const c = res.clone(); caches.open(CACHE).then((x) => x.put(req, c)); return res; })));
     return;
   }
   if (url.origin !== location.origin) return;
-
-  // own files: network first so updates land at once, cache when offline
-  const key = req.mode === "navigate" ? "/" : req;
+  const key = req.mode === "navigate" ? "/" : url.pathname;
   e.respondWith(fetch(req).then((res) => {
-    if (res.ok) { const copy = res.clone(); caches.open(CACHE).then((c) => c.put(key, copy)); }
+    if (res.ok) { const c = res.clone(); caches.open(CACHE).then((x) => x.put(key, c)); }
     return res;
   }).catch(() => caches.match(key)));
 });
