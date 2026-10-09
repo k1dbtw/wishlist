@@ -1,6 +1,6 @@
 import * as store from "../store.js";
 import { barChart, stack } from "../charts.js";
-import { h, money, parseTxn, today, dayLabel, parseDay, monthName, monthShort, plural, toNumber, toast, sheet } from "../util.js";
+import { h, money, parseTxn, parseBulk, today, dayLabel, parseDay, monthName, monthShort, plural, toNumber, toast, sheet } from "../util.js";
 
 export function moneyView(ctx) {
   const now = new Date();
@@ -11,10 +11,11 @@ export function moneyView(ctx) {
   const sign = h("button", { type: "button", class: "sign", "aria-label": "расход или доход" });
   const go = h("button", { type: "submit", class: "go", "aria-label": "добавить" }, "+");
   const preview = h("p", { class: "preview" });
+  const bulkBtn = h("button", { type: "button", class: "link", onclick: () => openImport("") }, "вставить списком");
   const catChips = h("div", { class: "chips", role: "group", "aria-label": "категория" });
   const form = h("form", { class: "capture", autocomplete: "off" }, sign, input, go);
   const body = h("div");
-  const el = h("section", { "aria-label": "деньги" }, form, preview, catChips, body);
+  const el = h("section", { "aria-label": "деньги" }, form, h("div", { class: "preview-row" }, preview, bulkBtn), catChips, body);
 
   const parsed = () => parseTxn(input.value, ctx.cats());
   const effective = () => {
@@ -42,6 +43,11 @@ export function moneyView(ctx) {
         h("i", { class: "dot", style: { background: `var(--c${c.color})` } }), c.name));
     }
   }
+  // a pasted multi-line list goes to the import sheet instead of the one-line field
+  input.addEventListener("paste", (e) => {
+    const text = (e.clipboardData || window.clipboardData)?.getData("text") || "";
+    if (text.trim().includes("\n")) { e.preventDefault(); openImport(text); }
+  });
   input.addEventListener("input", () => { if (!input.value.trim()) { st.addCat = null; st.addKind = null; st.addDate = null; } renderCapture(); });
   sign.addEventListener("click", () => { st.addKind = effective().kind === "income" ? "expense" : "income"; st.addCat = null; renderCapture(); input.focus(); });
   form.addEventListener("submit", (ev) => {
@@ -230,6 +236,75 @@ export function moneyView(ctx) {
           h("button", { type: "button", class: "link danger", onclick: () => { const prev = store.remove("txns", t.id); close(); toast("Операция удалена", { label: "вернуть", run: () => store.put("txns", prev) }); } }, "удалить"),
           h("div", { class: "r" }, h("button", { type: "button", class: "btn ghost", onclick: close }, "Отмена"), save)));
       box.append(f);
+    });
+  }
+
+  // ---------- import a pasted list ----------
+  function openImport(initial) {
+    sheet("Вставить списком", (box, close) => {
+      const area = h("textarea", { id: "bulk-text", placeholder: "8 октября\n• Такси на работу: 27 000\n• Кофе флэт уайт: 50 000\n\n9 октября\n• Подписка Claude: 270 000", style: { minHeight: "160px" } });
+      area.value = initial;
+      const out = h("div", { style: { display: "grid", gap: "14px" } });
+      const addBtn = h("button", { type: "button", class: "btn", disabled: true }, "Добавить");
+      let groups = [];
+
+      const draw = () => {
+        const res = parseBulk(area.value, ctx.cats());
+        // keep dates and categories the person already changed when the text is edited
+        groups = res.groups.map((g, gi) => ({ ...g, date: (groups[gi] && groups[gi].touched ? groups[gi].date : g.date) || groups[gi]?.date || today(), touched: groups[gi]?.touched,
+          items: g.items.map((it) => ({ ...it, cat: it.cat || ctx.fallbackCat(it.kind), on: true })) }));
+        out.textContent = "";
+        if (!area.value.trim()) { addBtn.disabled = true; addBtn.textContent = "Добавить"; return; }
+        groups.forEach((g, gi) => {
+          const total = g.items.reduce((s, it) => s + (it.kind === "income" ? it.amount : -it.amount), 0);
+          const dateIn = h("input", { type: "date", id: "bulk-date-" + gi, value: g.date, max: "2100-12-31", style: { border: 0, background: "var(--soft)", borderRadius: "8px", padding: "6px 10px", font: "inherit" },
+            onchange: () => { g.date = dateIn.value || g.date; g.touched = true; dateIn.previousElementSibling?.remove(); } });
+          const list = h("ul", { class: "list" });
+          g.items.forEach((it, ii) => {
+            const sel = h("select", { id: `bulk-cat-${gi}-${ii}`, "aria-label": "категория", style: { border: 0, background: "var(--soft)", borderRadius: "8px", padding: "4px 8px", font: "inherit", fontSize: "13px", maxWidth: "100%" },
+              onchange: () => { it.cat = sel.value; } },
+              ctx.cats(it.kind).map((c) => h("option", { value: c.id, selected: c.id === it.cat }, c.name)));
+            const chk = h("input", { type: "checkbox", id: `bulk-on-${gi}-${ii}`, checked: true, "aria-label": "добавить эту строку", onchange: () => { it.on = chk.checked; recount(); } });
+            list.append(h("li", { class: "row", style: { cursor: "default", padding: "10px 0" } },
+              chk,
+              h("div", { class: "main" }, h("div", { class: "t" }, it.note), h("div", { class: "sub" }, sel)),
+              h("div", { class: "amt" + (it.kind === "income" ? " in" : "") }, money(it.kind === "income" ? it.amount : -it.amount, ctx.currency(), { sign: true }))));
+          });
+          out.append(h("div", {},
+            h("div", { class: "group-h", style: { marginTop: 0, alignItems: "center" } },
+              h("span", { style: { display: "flex", gap: "8px", alignItems: "center" } }, !res.groups[gi].date && !g.touched ? h("b", { style: { color: "var(--bad)" } }, "дата?") : null, dateIn),
+              h("span", { class: "num" }, money(total, ctx.currency(), { sign: true }))),
+            list));
+        });
+        if (groups.some((g, gi) => !res.groups[gi].date)) out.prepend(h("p", { class: "note" }, "У первых строк нет даты. Выбери её выше, иначе они запишутся на сегодня."));
+        if (res.skipped.length) out.append(h("p", { class: "note" }, `Без суммы, пропущено: ${res.skipped.join("; ")}`));
+        recount();
+      };
+      const recount = () => {
+        const items = groups.flatMap((g) => g.items.filter((it) => it.on));
+        const sum = items.reduce((s, it) => s + it.amount, 0);
+        addBtn.disabled = !items.length;
+        addBtn.textContent = items.length ? `Добавить ${items.length} ${plural(items.length, ["операцию", "операции", "операций"])} · ${money(sum, ctx.currency())}` : "Нечего добавить";
+      };
+      let t; area.addEventListener("input", () => { clearTimeout(t); t = setTimeout(draw, 250); });
+      addBtn.onclick = () => {
+        let n = 0, last = null;
+        for (const g of groups) for (const it of g.items) {
+          if (!it.on) continue;
+          store.put("txns", { kind: it.kind, amount: it.amount, cat: it.cat, date: g.date, note: it.note });
+          n++; last = g.date;
+        }
+        close();
+        if (last) { const d = parseDay(last); st.y = d.getFullYear(); st.m = d.getMonth(); if (st.mode === "all") st.mode = "month"; }
+        render();
+        toast(`Добавлено ${n} ${plural(n, ["операция", "операции", "операций"])}`);
+      };
+      box.append(
+        h("p", { class: "note" }, "Каждая строка — одна трата: «название: сумма» или «кофе 25к». Строка с датой («8 октября») относится ко всему, что ниже. Доход — со знаком +."),
+        h("label", { class: "field" }, area), out,
+        h("div", { class: "acts" }, h("button", { type: "button", class: "btn ghost", onclick: close }, "Отмена"), addBtn));
+      draw();
+      if (!initial) area.focus();
     });
   }
 

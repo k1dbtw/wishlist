@@ -1,5 +1,5 @@
 // app shell works offline; /api always goes to the network
-const CACHE = "stash-v2";
+const CACHE = "stash-v3";
 const SHELL = ["/", "/styles.css", "/js/boot.js", "/js/app.js", "/js/util.js", "/js/store.js", "/js/charts.js", "/js/defaults.js",
   "/js/views/money.js", "/js/views/tasks.js", "/js/views/wishes.js", "/js/views/settings.js",
   "/manifest.webmanifest", "/favicon.svg", "/icons/icon-192.png"];

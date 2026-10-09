@@ -188,3 +188,53 @@ export function download(name, text, type = "text/plain") {
   document.body.append(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
 }
 export const csvCell = (v) => { const s = v == null ? "" : String(v); return /[",;\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
+
+// ---------- bulk import: a pasted list of expenses, grouped under date lines ----------
+//   7 октября            ← date line (a total after it is ignored)
+//   • Monster белый: 28 000
+//   • такси 27к
+export function guessCat(note, kind, cats) {
+  const lower = " " + note.toLowerCase();
+  const c = cats.find((x) => x.scope === kind && kwMatch(x, lower));
+  return c ? c.id : null;
+}
+
+const DATE_LINE = new RegExp(String.raw`^(\d{1,2})\s+(${MONTHS_GEN.join("|")})(?:\s+(\d{4}))?(?=$|[\s:—–-])\s*(?:[:—–-].*)?$`, "i");  // no \b: it is ASCII-only
+
+export function parseBulk(text, cats) {
+  const groups = [];
+  let cur = null;
+  const skipped = [];
+  for (const raw of text.split(/\r?\n/)) {
+    const line = raw.replace(/^[\s•·*▪◦‣\-–—]+/, "").replace(/\s+$/, "");
+    if (!line) continue;
+    const d = line.match(DATE_LINE);
+    if (d) {
+      const m = MONTHS_GEN.indexOf(d[2].toLowerCase());
+      let y = d[3] ? +d[3] : new Date().getFullYear();
+      let date = dayStr(new Date(y, m, +d[1]));
+      if (!d[3] && diffDays(date, today()) > 1) date = dayStr(new Date(y - 1, m, +d[1]));  // "28 декабря" pasted in January
+      cur = { date, items: [] };
+      groups.push(cur);
+      continue;
+    }
+    let kind = "expense", s = line;
+    if (/^\+/.test(s)) { kind = "income"; s = s.slice(1).trim(); }
+    let note, amount = null;
+    const m = s.match(/^(.*?)\s*[:=—–]\s*([+-]?\d[\d\s .,]*)\s*(млн|mln|к|k|тыс\.?|сум|сўм|so'?m|uzs)?\.?\s*$/i);
+    if (m) {
+      let num = m[2].trim();
+      if (/^\d{1,3}(\.\d{3})+$/.test(num)) num = num.replace(/\./g, "");  // 1.200.000
+      amount = toAmount(num.replace(/^[+-]/, ""), m[3]);
+      note = m[1];
+    } else {
+      const p = parseTxn(s, cats);
+      amount = p.amount; note = p.note;
+    }
+    note = note.replace(/[\s,.;:—–-]+$/, "").trim();
+    if (!amount || !note) { skipped.push(line); continue; }
+    if (!cur) { cur = { date: null, items: [] }; groups.push(cur); }
+    cur.items.push({ note: note.slice(0, 300), amount, kind, cat: guessCat(note, kind, cats) });
+  }
+  return { groups: groups.filter((g) => g.items.length), skipped };
+}

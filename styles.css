@@ -96,6 +96,9 @@ button { cursor: pointer; }
 .go.on { opacity: 1; transform: none; pointer-events: auto; }
 .sign { flex: none; width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--line); background: transparent; font-size: 20px; line-height: 1; display: grid; place-items: center; }
 .sign[data-kind="income"] { color: var(--good); border-color: color-mix(in srgb, var(--good) 40%, transparent); }
+.preview-row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.preview-row .preview { flex: 1; min-width: 0; }
+.preview-row .link { flex: none; margin-top: 8px; }
 .preview { margin: 8px 0 0; font-size: 13px; color: var(--muted); min-height: 1.45em; overflow-wrap: anywhere; }
 .preview b { color: var(--fg); font-weight: 500; }
 

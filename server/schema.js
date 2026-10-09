@@ -48,7 +48,7 @@ const shapes = {
   }),
   prefs: (x) => ({
     currency: oneOf(x.currency, ["UZS", "RUB", "USD", "EUR", "KZT", "UAH", "BYN", "GBP", "TRY", "GEL", "AMD"], "UZS"),
-    cv: oneOf(x.cv, [1, 2, 3, 4], 1),  // one-time client migrations done: 2 = currency → UZS, 3 = "Энергетики", 4 = "Напитки" and "Подарки"
+    cv: oneOf(x.cv, [1, 2, 3, 4, 5], 1),  // one-time client migrations done: 2 = currency → UZS, 3 = "Энергетики", 4 = "Напитки" and "Подарки", 5 = "Долги"
     budget: num(x.budget),
     name: str(x.name, 60),
   }),
