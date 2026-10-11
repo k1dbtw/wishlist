@@ -184,6 +184,7 @@ export function sheet(title, build) {
 
 // ---------- csv / download ----------
 export function download(name, text, type = "text/plain") {
+  if (window.StashAndroid) { window.StashAndroid.save(name, text, type); return; }  // Android app: saved to Downloads
   const a = h("a", { href: URL.createObjectURL(new Blob([text], { type })), download: name });
   document.body.append(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
 }

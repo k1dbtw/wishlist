@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>stash</title>
+<style>
+  :root { --bg: #f4f4f6; --fg: #16161a; --muted: #85858f; --line: #e3e3e9; color-scheme: light; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #0f0f11; --fg: #ececf0; --muted: #74747e; --line: #232328; color-scheme: dark; } }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 16px/1.5 system-ui, sans-serif; padding: 18vh 24px 40px; }
+  main { max-width: 420px; margin: 0 auto; display: grid; gap: 20px; }
+  h1 { font: italic 400 64px/0.9 "Iowan Old Style", "Times New Roman", serif; margin: 0; }
+  p { margin: 0; color: var(--muted); }
+  a.btn { justify-self: start; background: var(--fg); color: var(--bg); text-decoration: none; padding: 12px 24px; border-radius: 999px; font-weight: 500; }
+  a.link { color: var(--muted); font-size: 14px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>stash</h1>
+  <p>Не получилось открыть сайт. Проверь интернет и попробуй ещё раз. Если сеть есть, возможно, в адресе сайта ошибка.</p>
+  <a class="btn" href="stash://retry">Попробовать снова</a>
+  <a class="link" href="stash://setup">сменить адрес сайта</a>
+</main>
+</body>
+</html>
